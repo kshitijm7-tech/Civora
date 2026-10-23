@@ -17,9 +17,10 @@ import { SheltersView } from './features/shelters/SheltersView.js';
 import { RescueCenterView } from './features/rescue/RescueCenterView.js';
 import { SimulationLabView } from './features/simulation/SimulationLabView.js';
 import { EventLogView } from './features/events/EventLogView.js';
+import { DemoMapView } from './features/demo/DemoMapView.js';
 import { 
   Activity, Package, Zap, Bike, Building2, 
-  ShieldAlert, Cpu, FileText, AlertCircle, RefreshCw
+  ShieldAlert, Cpu, FileText, AlertCircle, RefreshCw, Map
 } from 'lucide-react';
 
 type NavTab = 
@@ -30,7 +31,8 @@ type NavTab =
   | 'shelters'
   | 'rescue'
   | 'simulation'
-  | 'events';
+  | 'events'
+  | 'demo';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<NavTab>('operations');
@@ -102,6 +104,7 @@ export const App: React.FC = () => {
     },
     { id: 'simulation', label: 'Simulation Lab', icon: <Cpu className="w-4 h-4" /> },
     { id: 'events', label: 'Audit Event Log', icon: <FileText className="w-4 h-4" /> },
+    { id: 'demo', label: 'Demo Map', icon: <Map className="w-4 h-4" /> },
   ];
 
   const simulatedNow = dashboard?.simulatedTime || new Date().toISOString();
@@ -252,6 +255,10 @@ export const App: React.FC = () => {
             <EventLogView
               onRefreshTrigger={refreshTrigger}
             />
+          )}
+
+          {activeTab === 'demo' && (
+            <DemoMapView />
           )}
         </main>
 
