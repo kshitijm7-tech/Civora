@@ -5,7 +5,7 @@ import { AllocationLedgerBar } from '../../components/AllocationLedgerBar.js';
 import { NetworkSchematic } from '../../components/NetworkSchematic.js';
 import { GpsLeafletMap } from '../../components/GpsLeafletMap.js';
 import { 
-  AlertTriangle, ShieldAlert, ArrowRight, Truck, CheckCircle2, 
+  AlertTriangle, ArrowRight, Truck, CheckCircle2, 
   Clock, Package, RefreshCw, Eye, Map, Compass
 } from 'lucide-react';
 import { api } from '../../lib/api.js';
@@ -79,40 +79,6 @@ export const OperationsView: React.FC<OperationsViewProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Critical Alert Banner */}
-      {dashboard.criticalAlerts.length > 0 && (
-        <div className="bg-red-50 border-l-4 border-red-600 p-4 rounded-r-lg shadow-xs space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ShieldAlert className="w-5 h-5 text-red-600 shrink-0" />
-              <h3 className="text-sm font-bold text-red-900 uppercase tracking-wider">
-                {dashboard.criticalAlerts.length} Operational Issue(s) Requiring Attention
-              </h3>
-            </div>
-            <span className="text-xs font-mono font-semibold text-red-700 bg-red-100 px-2 py-0.5 rounded">
-              Active Intervention
-            </span>
-          </div>
-          <div className="space-y-1.5 pt-1">
-            {dashboard.criticalAlerts.map(alert => (
-              <div key={alert.id} className="text-xs text-red-800 flex items-start justify-between gap-3 bg-red-100/50 p-2 rounded">
-                <div>
-                  <strong className="font-semibold">{alert.title}:</strong> {alert.message}
-                </div>
-                {alert.assignmentId && (
-                  <button
-                    onClick={() => onOpenShipment(alert.assignmentId!)}
-                    className="text-[11px] font-bold text-red-700 hover:text-red-900 underline shrink-0"
-                  >
-                    Open Workspace &rarr;
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Top Operations KPI Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
