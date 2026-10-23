@@ -1,0 +1,445 @@
+AIDFLOW
+Resilient Aid Logistics
+Product, UX, Architecture & Omnirush Build Blueprint
+Vibe-A-Thon • Social Impact & Civic Micro-Logistics
+A practical, implementation-ready plan for a six-hour prototype focused on keeping perishable aid moving when reservations fail, destinations change, or delivery becomes infeasible.
+
+PRODUCT PROMISE
+Every shipment gets a feasibility-checked recovery plan before dispatch. If conditions change, AidFlow revalidates options, preserves cargo accounting, and either recovers safely or clearly requests human intervention.
+
+Prepared for development using Omnirush as the sole coding agent.
+Version 1.0 • 23 October 2026
+
+ 1. Executive Summary
+AidFlow is a failure-resilient micro-logistics coordination prototype for surplus cooked food and emergency aid. It connects donors, volunteer riders, and receiving shelters while treating expiry deadlines, carrying capacity, destination compatibility, reservation reliability, and changing ground conditions as active constraints.
+The supplied problem statement highlights three operational failure classes: bulk supply does not match rider/shelter capacity; claimed batches can be stranded by unresponsive volunteers; and destination demand can change while cargo is in transit. It also identifies resource dependencies, such as raw ration kits requiring clean water or cooking fuel.
+THE DIFFERENTIATOR
+Do not pitch AidFlow as another donor directory or AI matching app. Pitch the AidFlow Rescue Protocol: precomputed fallback candidates, a visible rescue clock, cargo-aware recovery, live feasibility revalidation, and an auditable explanation of every decision.
+
+Success definition
+•	A judge can create a time-sensitive batch and dispatch it across multiple riders.
+•	A ghost reservation expires and releases stock exactly once.
+•	A shelter closure or demand reduction triggers a safe reroute or an explicit intervention alert.
+•	Unsafe, incompatible, over-capacity, expired, and duplicate assignments are blocked by deterministic code.
+•	The app starts from documented commands, persists state, has automated tests, and can be demoed without credentials or internet access.
+What this prototype is not
+•	Not a production emergency-response system or a substitute for trained logistics/safety personnel.
+•	Not real GPS tracking, live traffic prediction, food-safety certification, or medical advice.
+•	Not dependent on an LLM for safety-critical allocation decisions.
+•	Not a promise of a measured real-world reduction in spoilage; any impact figures must be benchmark results from clearly labeled simulations.
+2. Challenge Requirements and Interpretation
+Source-derived requirements from the supplied Vibe-A-Thon problem statement:
+Challenge detail	Required system response	How AidFlow demonstrates it
+A large batch may exceed one rider's capacity and one shelter's demand.	Split supply across feasible rider/destination allocations.	Capacity-aware dispatch preview and allocation ledger.
+A volunteer can claim a batch and go unresponsive.	Prevent ghost reservations from locking stock indefinitely.	Reservation lease, timeout processor, exactly-once release, event log.
+Shelter demand may become zero during transit.	Recover the incoming shipment instead of leaving it stranded.	Live destination revalidation and cargo-aware rerouting/intervention.
+Some aid requires resources such as water or fuel.	Enforce compatibility and required-resource constraints.	Hard validation rules with visible rejection reasons.
+Judges will simulate failures.	Make operational failures reproducible and observable.	Judge Simulation panel connected to actual backend operations.
+Continuous GitHub commits are required.	Show incremental progress and maintain a reviewable repository.	Small verified commits, no secrets, release checklist.
+
+The original handout gives an example of 180 meals with 75 minutes of safe shelf life, a rider capacity of 40 meals, and a shelter demand of 50. Treat these as a demonstration scenario, not as universal food-safety rules. Expiry values are supplied/configured inputs.
+3. Product Vision and Positioning
+Working name
+AidFlow — Resilient Aid Logistics
+One-line pitch
+PITCH
+AidFlow coordinates surplus food and emergency aid with failure-aware dispatch: every assignment is checked against time, capacity, demand, and compatibility, and every shipment has a traceable recovery path.
+
+Primary users
+User	Main job	MVP workflow
+Network coordinator / operator	Keep the network safe and moving.	View operations, dispatch, intervene, close shelters, simulate failures.
+Donor	Offer usable surplus quickly and accurately.	Create a batch with quantity, category, origin, expiry, and handling requirements.
+Volunteer rider	Know what to collect, where to go, and what changed.	View assignment, acknowledge, mark pickup/transit/delivery, report unavailability.
+Shelter / receiving centre	Receive appropriate quantities it can use.	Declare demand, capacity/requirements, availability, and closures.
+
+Product principles
+•	Safety before utilization: do not allocate aid just to maximize a dashboard number.
+•	Explain every rejection and recovery decision in plain language.
+•	Treat physical cargo state as a first-class concept.
+•	Show simulation versus real-world data clearly.
+•	Make the safe action obvious to a first-time operator.
+•	Graceful failure is a valid outcome: when no safe recovery exists, ask for human intervention rather than fabricate success.
+4. Signature Feature: AidFlow Rescue Protocol
+The Rescue Protocol is a proposed differentiator, not a claim of global novelty. Other teams may build similar ideas. AidFlow should distinguish itself through a working, measurable, clearly explained implementation.
+Capability	Behavior	Visible proof
+Fallback candidate planning	Before dispatch, rank feasible alternative shelters without reserving their stock or capacity.	Rescue Plan panel shows candidate, ETA, demand, requirements, and rejection reasons.
+Rescue clock	Estimate time remaining to the original safe-use deadline and compare it with travel/recovery time plus safety margin.	Remaining time, estimated recovery duration, and feasibility state.
+Cargo-aware state	Distinguish donor-held, reserved, picked-up, in-transit, delivered, and intervention-required cargo.	Timeline and quantity ledger make custody explicit.
+Live revalidation	Recheck demand, shelter status, compatibility, rider status, capacity, and expiry when recovery is requested.	Stale fallback candidate is rejected with a reason.
+Auditable recovery	Log trigger, candidates evaluated, decision, quantities affected, and resulting state.	Event timeline and recovery report.
+No-safe-option handling	Raise a critical intervention when every option is infeasible.	No false delivery status; clear operator action required.
+
+Recovery decision sequence
+1.	Detect a trigger: reservation timeout, rider unavailable, shelter closed, demand changed, or expiry feasibility changed.
+2.	Freeze the affected shipment's allocation changes while the recovery transaction is evaluated.
+3.	Determine cargo custody and quantity: at donor, reserved, picked up, in transit, or already delivered.
+4.	Generate current candidate destinations and riders; do not trust a stale fallback snapshot.
+5.	Apply hard constraints first: active shelter, positive demand, item compatibility, required resources, capacity, and arrival before the original deadline with margin.
+6.	Rank only the feasible candidates using urgency, travel time, demand priority, and route practicality.
+7.	Apply the chosen transition atomically and write an event record.
+8.	If no candidate passes, preserve cargo state and create an intervention alert with rejection reasons.
+SAFETY RULE
+A fallback is a candidate, not a reservation. An in-transit shipment cannot be treated as stock still at the donor. Never extend expiry to make a plan appear feasible.
+
+5. Scope: Must-Have, Should-Have, Deferred
+Priority	Features	Decision
+P0 — must ship	Persistent batches, shelters, riders, assignments; deterministic dispatch; capacity splitting; compatibility gates; reservation lease; shelter closure/demand-change recovery; cargo ledger; event log; simulation panel; tests; README; commits.	Required for judging.
+P1 — if core is stable	Fallback candidate ranking, rescue clock, scenario comparison benchmark, keyboard-accessible shortcuts, exportable incident report.	Add only after P0 works.
+P2 — defer	Real GPS, live traffic, SMS/WhatsApp, authentication/roles, multi-tenant deployment, advanced routing solver, real medical inventory integrations, full AI assistant.	Not worth risking the six-hour MVP.
+
+Explicit non-goals
+•	No external model call is required for the main workflow.
+•	No live map provider or API key is required; use a schematic map with clearly labeled simulated locations.
+•	No claim that all donated food is safe: the donor/operator must provide the applicable safe-use deadline and handling rules.
+•	No automatic handover of cargo between riders without an explicit modeled custody-transfer step.
+6. UI/UX Direction: Professional, Distinctive, Easy to Operate
+Design for an operations coordinator working under time pressure, not for a generic SaaS analytics audience. The interface should communicate what is urgent, what is safe, what has changed, and what action is available.
+Visual concept: Calm Command Center
+Design token	Recommendation	Purpose
+Primary ink	#102A43 deep navy	Trust, legibility, professional structure.
+Primary action	#176B68 deep teal	Operational actions and selected navigation.
+Canvas	#F5F7F8 warm cool-gray	Reduces glare and keeps dense tables readable.
+Surface	#FFFFFF	Cards and tables with restrained borders.
+Urgent	#B54735 rust red	Critical expiry/safety alerts; never decoration.
+Caution	#9A6700 amber	At-risk shipments and deadlines.
+Success	#287D5A	Verified completion states.
+Typography	Aptos/Inter/system sans; tabular numerals for timers	Clear hierarchy and stable number alignment.
+Shape/elevation	8–12 px radius, subtle borders, limited shadows	Purposeful, not toy-like or overly glossy.
+
+What makes the UI less generic
+•	A persistent Rescue Queue rather than a wall of identical KPI cards.
+•	A shipment-centric 'decision workspace' showing current state, rescue clock, cargo custody, feasible alternatives, and the next safe action together.
+•	A visual allocation ledger: total batch quantity split into unassigned, reserved, picked-up/in-transit, delivered, and intervention-required amounts.
+•	A decision explanation drawer that states why each destination passed or failed.
+•	A simulation clock with explicit 'SIMULATION' label and controls to advance time deterministically.
+•	An event timeline that shows cause → decision → outcome, not just generic activity entries.
+•	Critical states use labels and icons as well as color, with clear action buttons and keyboard-accessible controls.
+Information architecture
+Navigation	Purpose	Key content
+Operations	At-a-glance command center.	Rescue queue, urgent shipments, map/schematic, assignment table, critical alerts.
+Shipments	Manage donor batches and their lifecycle.	Create batch, expiry, quantity ledger, assignment details, timeline.
+Dispatch	Preview and confirm allocations.	Feasible candidates, split allocations, constraint explanations.
+Riders	Manage capacity and availability.	Capacity, current cargo, availability, reservations, actions.
+Shelters	Manage demand and capabilities.	Demand by category, active/closed, required resources, incoming allocations.
+Rescue Center	Recover failed or threatened shipments.	Trigger, rescue clock, fallback candidates, revalidation, intervention workflow.
+Simulation Lab	Reproduce judging scenarios.	Seed/reset, ghost reservation, shelter closure, demand reduction, expiry failure.
+Event Log	Audit decisions.	Timestamp, entity, trigger, action, outcome, quantity change, reason.
+
+Main dashboard layout
+•	Top bar: AidFlow logo, environment badge (DEMO/SIMULATION), simulation time, reset-demo control.
+•	Left navigation: Operations, Shipments, Dispatch, Riders, Shelters, Rescue Center, Simulation Lab, Event Log.
+•	Primary column: Rescue Queue sorted by urgency, with time-to-deadline, current destination, quantity, and next action.
+•	Secondary column: network schematic showing donor/rider/shelter nodes and shipment paths.
+•	Lower workspace: active assignments table and event timeline.
+•	Global alert banner only for critical safety/intervention issues; ordinary updates stay in the event feed.
+Shipment detail / decision workspace
+•	Header: shipment ID, item/category, quantity, current status, original expiry deadline.
+•	Rescue clock: time remaining, estimated travel time, safety margin, feasibility state.
+•	Quantity ledger: unassigned / reserved / carried / delivered / intervention-required.
+•	Current plan: rider, destination, ETA, last state update.
+•	Fallback candidates: ranked list with ETA, remaining demand, capability checks, and pass/fail reasons.
+•	Decision history: trigger, evaluated options, chosen action, and audit events.
+•	Primary action changes by state; for example, 'Acknowledge reservation', 'Confirm pickup', 'Mark in transit', 'Complete delivery', or 'Start recovery'.
+UX rules
+•	Use plain language: 'Shelter cannot accept this batch: clean water requirement is unmet.'
+•	Never use a disabled button without explaining why it is disabled.
+•	Confirm destructive actions such as closing a shelter or resetting demo data.
+•	Use empty, loading, error, and success states for all API-backed screens.
+•	After mutations, refresh from the backend; never trust optimistic UI as the final source of truth.
+•	Show timestamps with timezone or simulation labels; show units on all quantities.
+•	Make tables responsive, with key actions visible and secondary details in a drawer.
+•	Meet practical accessibility basics: keyboard focus, labels, sufficient contrast, non-color status cues.
+7. Core User Journeys
+Journey A — Create and dispatch surplus
+9.	Operator creates a batch with category, quantity, donor origin, supplied expiry deadline, and handling/resource requirements.
+10.	AidFlow validates inputs and calculates the current feasible window.
+11.	Dispatch preview evaluates riders and shelters and shows accepted/rejected candidates with reasons.
+12.	The operator confirms the allocation; the backend atomically reserves quantities and creates assignment records.
+13.	Riders acknowledge reservations; the event log records each transition.
+Journey B — Ghost reservation
+14.	A rider reserves a shipment but does not acknowledge it before the configured lease deadline.
+15.	The simulation clock or timeout processor detects the overdue lease.
+16.	The reservation expires exactly once; quantity is returned to the correct available pool.
+17.	The system searches for a feasible reassignment and records the result.
+18.	The UI shows the timeout trigger, quantity released, reassignment or intervention outcome, and event history.
+Journey C — Destination changes during transit
+19.	A shipment is marked picked up/in transit, with custody assigned to the carrying rider.
+20.	The shelter closes or its remaining demand drops.
+21.	The system does not release the cargo as donor stock. It marks the original destination as infeasible and evaluates alternatives.
+22.	A new destination is selected only after current demand, requirements, capacity, and expiry feasibility pass.
+23.	If no safe option exists, the shipment enters an intervention-required state; it is not falsely marked delivered.
+8. Dispatch and Recovery Logic
+Hard constraints before ranking
+•	Batch is active and not past its configured safe-use deadline.
+•	Candidate shelter is active and has positive remaining demand for the category.
+•	Item category and handling rules are compatible with the shelter.
+•	Required resources are available at the destination.
+•	Rider is available and remaining carrying capacity is sufficient for the allocated quantity.
+•	Estimated arrival plus safety margin is no later than the supplied safe-use deadline.
+•	Allocation does not exceed remaining batch quantity, shelter demand, or rider capacity.
+•	For in-transit cargo, recovery preserves the existing cargo custody and does not create a duplicate physical shipment.
+Simple explainable ranking
+After hard constraints are applied, rank feasible candidates with a deterministic weighted score. Keep the formula configurable and explain the values shown to the operator.
+score = urgency_weight * urgency + demand_weight * demand_priority - travel_weight * estimated_minutes - risk_weight * uncertainty_penalty
+Do not use this score to override a failed hard constraint. A high score cannot make an unsafe or infeasible candidate eligible.
+Quantity accounting model
+Quantity bucket	Meaning	May be reallocated?
+Available / unassigned	Still held at donor or otherwise not committed.	Yes, if still eligible and unexpired.
+Reserved	Allocated to a rider but not picked up.	Only after valid cancellation/expiry and exactly-once release.
+Picked up / in transit	Physical cargo is under rider custody.	Only through a valid reroute/recovery flow; never as donor-held stock.
+Delivered	Confirmed accepted delivery.	No.
+Intervention required	Cargo exists but no feasible automated recovery is currently available.	Only through an explicit operator action and revalidation.
+
+State machine
+AVAILABLE -> RESERVED -> ACKNOWLEDGED -> PICKED_UP -> IN_TRANSIT -> DELIVERED
+Additional transitions include RESERVED -> EXPIRED/CANCELLED -> AVAILABLE, and active shipment -> INTERVENTION_REQUIRED. Model custody separately from assignment status if that avoids ambiguous states. Never expire a shipment reservation after pickup as though the cargo were still at the donor.
+Time handling
+•	Store timestamps consistently (UTC in persisted records; render local time in the UI).
+•	Use an injectable clock for tests and a simulated clock for the judge demo.
+•	Use the original configured safe-use deadline; do not extend it during reassignment.
+•	Treat estimated travel times as simulated unless connected to a real routing provider.
+•	Add a configurable safety margin and explain it in the interface.
+9. Technical Stack and Architecture
+Layer	Choice	Reason / boundary
+Frontend	React + TypeScript + Vite	Fast development, component reuse, strict types.
+Styling	Tailwind CSS; small reusable component set	Consistent visual tokens and fast responsive layouts.
+Backend	Node.js + Express + TypeScript	One language across frontend/backend; simple API surface.
+Persistence	SQLite	Local, reliable, easy to demo, no external DB account.
+Validation	Zod or equivalent schema validation	Validate request bodies and environment configuration.
+Dispatch engine	Pure TypeScript domain services	Deterministic, testable, independent from UI/LLM.
+Testing	Vitest + API integration tests	Fast unit tests and repeatable judge scenarios.
+Map	Schematic SVG/CSS map with seeded coordinates	No keys, network, or live-map failure risk.
+Updates	Refresh after mutations; optional polling	Adequate for demo; avoids WebSocket complexity.
+AI	Optional explanatory summary only after core features	No dependency for safety decisions; skip if it threatens deadline.
+Repository	Git + GitHub	Continuous commits required by the challenge.
+
+High-level architecture
+React UI -> Express API -> Validation -> Domain services (Dispatch / Rescue / State transitions) -> SQLite
+                                  |-> Event log / audit records
+                                  |-> deterministic simulation clock + seed scenarios
+Recommended project structure
+aidflow/
+  client/
+    src/
+      app/
+      components/
+      features/
+        operations/
+        shipments/
+        dispatch/
+        riders/
+        shelters/
+        rescue/
+        simulation/
+        events/
+      lib/api.ts
+      styles/
+  server/
+    src/
+      app.ts
+      routes/
+      schemas/
+      services/
+        dispatch.service.ts
+        rescue.service.ts
+        state-machine.service.ts
+        clock.service.ts
+        event-log.service.ts
+      db/
+        schema.sql
+        seed.ts
+      tests/
+  shared/
+    types.ts
+    constants.ts
+  README.md
+  .env.example
+  .gitignore
+  package.json
+If Omnirush's existing scaffold differs, adapt this layout rather than spending time on unnecessary restructuring.
+10. Data Model
+Entity	Key fields	Important invariants
+AidBatch	id, donorName, category, totalQuantity, safeUseDeadline, origin, handlingRequirements, status, createdAt	Quantity positive; deadline explicit; category and handling requirements validated.
+Shelter	id, name, location, active, demandByCategory, resources, updatedAt	Remaining demand cannot become negative; closed shelter receives no new assignment.
+Rider	id, name, capacity, available, location, status, updatedAt	Active cargo plus reserved capacity cannot exceed capacity, according to chosen capacity policy.
+Assignment	id, batchId, riderId, shelterId, quantity, status, leaseDeadline, estimatedTravelMinutes, pickedUpAt, deliveredAt	Quantity positive; transitions validated; no duplicate allocation.
+ShipmentLedger	batchId, availableQty, reservedQty, inTransitQty, deliveredQty, interventionQty, version	Buckets reconcile to total quantity; update atomically.
+OperationalEvent	id, timestamp, entityType, entityId, eventType, reason, metadata	Append-only audit history; event records explain changes.
+SimulationConfig	scenarioId, simulatedNow, seedVersion, config	Simulation time is separate from host clock.
+
+Implementation note: keep the database schema as small as possible. Use foreign keys and transactions where supported. If a full ledger table is too much for the timebox, derive quantities from assignment records in one tested service; avoid multiple competing sources of truth.
+11. API Contract (Suggested MVP)
+Method + path	Purpose	Key behavior
+GET /api/health	Health check	Return app and database status.
+GET /api/dashboard	Dashboard summary	Return real counts, rescue queue, alerts, and recent events.
+GET/POST /api/batches	List/create batches	Validate quantity, category, origin, deadline, requirements.
+GET/PATCH /api/batches/:id	Read/update batch	Prevent invalid edits after pickup; preserve deadline history.
+GET/POST /api/shelters	List/create shelters	Validate demand, resources, and active state.
+PATCH /api/shelters/:id	Update shelter	Demand changes/closure trigger revalidation.
+GET/POST /api/riders	List/create riders	Validate capacity and availability.
+PATCH /api/riders/:id	Update rider	Unavailability triggers state-aware recovery.
+POST /api/dispatch/preview	Preview feasible plan	No stock mutation; return candidate decisions and reasons.
+POST /api/dispatch/confirm	Confirm allocations	Revalidate and persist atomically.
+POST /api/assignments/:id/acknowledge	Acknowledge reservation	Reject expired or invalid reservation.
+POST /api/assignments/:id/pickup	Record pickup	Validate state and custody.
+POST /api/assignments/:id/transit	Mark in transit	Validate transition and ETA feasibility.
+POST /api/assignments/:id/deliver	Confirm delivery	Validate quantity and destination acceptance.
+POST /api/rescue/:shipmentId/evaluate	Evaluate recovery	Recompute current candidates and return explainable result.
+POST /api/rescue/:shipmentId/execute	Execute recovery	Revalidate and atomically apply chosen safe recovery.
+POST /api/simulation/advance	Advance simulated time	Trigger deterministic timeout/expiry processing.
+POST /api/simulation/scenario/:name	Run judge scenario	Invoke actual domain operations; return outcome.
+POST /api/simulation/reset	Reset seeded demo	Require confirmation; restore known state.
+GET /api/events	Read audit history	Filter by entity, type, time, and severity.
+
+API error responses should be consistent and explainable, for example: { code, message, details }. Validate all incoming IDs and values. Never return a successful status when the domain operation was rejected.
+12. Verification and Test Plan
+Test group	Minimum acceptance cases
+Dispatch	Large batch splits across riders; no over-capacity; no over-demand; expired batch blocked; infeasible ETA blocked.
+Compatibility	Wrong category blocked; missing clean water/fuel requirement blocked; closed shelter blocked.
+Reservation lease	Unacknowledged reservation expires; stock releases once; repeated timeout has no duplicate effect.
+Cargo custody	Picked-up/in-transit stock is not returned to donor pool; delivery is immutable; handover is explicit.
+Recovery	Shelter closure triggers re-evaluation; reduced demand prevents over-delivery; stale fallback revalidated; no fallback produces intervention.
+Consistency	Ledger buckets reconcile; no negative quantity; duplicate API request does not duplicate assignment.
+Simulation	Clock advance is deterministic; reset restores seeded scenario; scenario calls real API/domain logic.
+UI/API	Loading/error/success states; all visible buttons work; mutations refresh from backend; production build succeeds.
+
+Example seeded scenario
+Input	Value
+Batch	180 meals
+Original safe-use window	75 minutes from scenario start
+Rider capacities	Five riders with 40-meal capacity each
+Initial shelter demand	Shelter A requests 50 meals; other shelters have separately configured needs and requirements.
+Expected dispatch behavior	No rider exceeds capacity; no shelter exceeds demand; unallocated quantity remains explicitly accounted for.
+Failure	A destination closes or reaches zero demand during transit.
+Expected recovery	Revalidate feasible alternatives; reroute only if safe and capacity/demand allow; otherwise intervention alert.
+Important	Do not hard-code an expected total delivery quantity without defining all shelter demands, travel times, safety margin, and other constraints.
+
+Benchmark methodology
+Compare baseline matching and Rescue Protocol on identical deterministic seeded scenarios. Measure safely delivered quantity, successful recovery rate, time to recovery, safety violations, and stock-accounting errors. Record the number of scenarios and exact configuration. Label all results as simulated. Do not claim a percentage improvement unless measured.
+13. Six-Hour Build Plan
+Elapsed time	Phase	Deliverable / gate
+00–30 min	Foundation	App starts; SQLite persists; basic entities/APIs; initial commit.
+30–100 min	Dispatch	Capacity/demand/resource/deadline constraints; split allocation; tests.
+100–175 min	Resilience	Reservation lease, state machine, shelter/rider failure recovery, event log.
+175–250 min	UX integration	Operations dashboard, Rescue Queue, detail workspace, simulation controls.
+250–300 min	Hardening	Integration tests, clean startup, production build, README, commits.
+300–330 min	Judge rehearsal	Run five scenarios from reset; verify visible outcomes and screenshots if useful.
+330–360 min	Protected buffer	Push repo, check status/remote, rehearse concise pitch, no risky new features.
+
+Scope-cut order if behind schedule
+•	Cut decorative animations and secondary charts first.
+•	Replace live map with a clear schematic.
+•	Defer optional AI explanations and advanced route optimization.
+•	Keep persistent state, quantity accounting, reservation expiry, failure recovery, event log, and core tests.
+•	If necessary, expose a smaller but working set of operator actions instead of adding more screens.
+14. Omnirush Execution Prompts
+Use these prompts sequentially. Do not ask Omnirush to execute all phases at once. After each prompt, inspect its test/build report and Git diff before proceeding.
+Prompt 1 — Foundation
+You are the sole coding agent for AidFlow, a Vibe-A-Thon prototype. Inspect the repository and environment first. Work directly in the repo, run terminal commands, install packages if needed, execute tests, and fix errors.
+
+Build a minimal full-stack app using React + TypeScript + Vite + Tailwind, Express + TypeScript, SQLite, request validation, and Vitest. Preserve a functioning existing scaffold if one exists. Create persistent entities for aid batches, shelters, riders, assignments, and append-only operational events. Add health and CRUD endpoints, deterministic seed/reset, a professional dashboard shell, .env.example, .gitignore, npm scripts, and a concise initial README.
+
+Design the interface as a calm civic-logistics command center: deep navy ink, teal primary actions, cool light-gray canvas, restrained borders, readable tables, status text/icons, and an obvious DEMO/SIMULATION badge. Do not build a generic AI landing page.
+
+No external API keys or LLM dependency. Run the app, tests, and production build. Commit the working baseline. Report actual commands, results, files, and commit hash. Do not claim unverified features.
+Prompt 2 — Dispatch engine
+Continue in the current AidFlow repository. Do not redesign or replace working infrastructure. Implement a deterministic, tested dispatch service.
+
+Validate batches, riders, shelters, quantities, categories, resource requirements, remaining demand, rider capacity, travel-time estimates, and the original configured safe-use deadline plus safety margin. Split large batches across feasible riders/destinations. Apply hard constraints before deterministic ranking. Return clear accept/reject reasons. Persist allocations atomically; repeated requests must not double-allocate stock. Track available, reserved, in-transit, delivered, and intervention quantities consistently. Keep all safety logic out of LLM calls.
+
+Add tests for large-batch splitting, capacity, demand, expiry, incompatible category, missing resource, closed shelter, duplicate dispatch, and ledger invariants. Connect UI to real APIs. Run all tests/build, fix failures, commit, and report evidence.
+Prompt 3 — Rescue Protocol
+Continue AidFlow without removing working features. Implement the AidFlow Rescue Protocol: feasibility-checked fallback candidates, rescue clock, cargo-aware recovery, live revalidation, and explainable audit events.
+
+Reservation lease: unacknowledged reservations expire after a configurable deadline and release stock exactly once. Never expire in-transit cargo as if it remained at the donor.
+
+Shelter closure/demand change: revalidate current destination and alternatives. For unpicked stock, release/reassign only through valid state transitions. For picked-up/in-transit cargo, preserve custody and reroute only if feasible; otherwise create intervention-required alert. Rider unavailability must also be handled according to custody state. Never extend the original deadline.
+
+For each recovery, record trigger, affected quantity, candidate destinations, pass/fail reasons, chosen action, and resulting state. Fallbacks are candidates, not reservations, and must be revalidated at execution.
+
+Use a deterministic/injectable simulation clock. Add tests for exactly-once release, shelter closure before pickup and mid-transit, demand reduction, rider failure, expiry infeasibility, stale fallback, no-feasible-option intervention, no duplicate allocation, and quantity reconciliation. Run tests/build and commit.
+Prompt 4 — Distinctive operations UX
+Continue the existing AidFlow app. Build a professional, accessible operator dashboard focused on decisions and rescue actions.
+
+Use a persistent left navigation and a clear operations workspace. Prioritize a Rescue Queue sorted by urgency, shipment detail/decision workspace, schematic network map with labeled simulated positions, allocation ledger, assignment table, critical alerts, and cause→decision→outcome event timeline. Add pages/panels for shipments, dispatch preview, riders, shelters, Rescue Center, Simulation Lab, and Event Log.
+
+Shipment detail must show status, original deadline, rescue clock, estimated travel time, safety margin, quantity buckets, current rider/destination, ranked fallback candidates, and explicit rejection reasons. Use status labels/icons as well as color. Buttons must call real backend operations, with loading/error/success states. Add judge scenario controls for batch splitting, ghost reservation, shelter closure in transit, demand reduction, and unsafe assignment. Label simulated time/locations honestly. No decorative fake metrics. Verify all workflows, tests, and production build; commit.
+Prompt 5 — Release hardening
+Prepare AidFlow for Vibe-A-Thon judging. Do not add major features. Audit all files, APIs, state transitions, quantity accounting, buttons, errors, Git diff, and secrets. Run complete tests, lint/type checks, and production build. Fix critical defects.
+
+Verify reproducible scenarios: (A) 180 meals, 75-minute deadline, five 40-capacity riders, shelter demand 50 plus explicitly configured additional shelter demand; (B) unacknowledged reservation timeout; (C) shelter demand becomes zero while 40 meals are in transit; (D) missing required resource blocks assignment; (E) no candidate can arrive before expiry. Do not hard-code outcomes; call actual APIs and assert results. Use deterministic simulation time and resettable seed data.
+
+Write README setup/run/test/build instructions, architecture, rules, scenario steps, expected outcomes, and known limitations. Check .gitignore, commit incremental changes, push to configured remote if available and authorized, and report exact test counts, build results, commit hashes, remote push status, and remaining blockers. Separate verified behavior from simulated/unverified behavior.
+15. Judge Demo Script (3–4 Minutes)
+Time	Action	Message to communicate
+0:00–0:30	Open Operations dashboard and show Rescue Queue.	AidFlow is designed around shipment feasibility and recovery, not just donor listings.
+0:30–1:10	Create/dispatch 180 meals across limited-capacity riders and defined shelter demand.	The engine respects capacity, demand, expiry, and resource rules.
+1:10–1:45	Trigger a ghost reservation and advance simulation time.	Reservations are leases; unresponsive claims do not lock stock indefinitely.
+1:45–2:35	Mark a shipment in transit, then close its destination or reduce demand to zero.	Cargo custody is preserved; the system revalidates alternatives and reroutes or requests intervention.
+2:35–3:10	Attempt an incompatible destination or impossible ETA.	Safety constraints are hard gates; the engine explains why the assignment is blocked.
+3:10–3:40	Show event log, quantity ledger, and test results.	Every decision is traceable and core behavior is verified by repeatable tests.
+
+Demo reliability checklist
+•	Run the complete demo once before presenting.
+•	Reset to known seed data before judges arrive.
+•	Keep terminal/test output ready to show, but do not rely on a long test run during the demo.
+•	Avoid external APIs, network-only features, and live credentials.
+•	If a scenario fails, explain the actual limitation; never fake the outcome.
+•	Keep a backup screen recording only if time allows, but live interaction should remain the primary proof.
+16. GitHub and Submission Readiness
+•	Use small commits after verified milestones: scaffold, dispatch, recovery, UX, hardening.
+•	Inspect git status and diff before each commit.
+•	Do not commit .env files, API keys, node_modules, build output, local secrets, or private operational data.
+•	Verify the remote URL and branch before pushing. Do not force-push.
+•	Keep README accurate about what is simulated and what is implemented.
+•	Confirm repository access and the project submission URL before the deadline.
+•	The problem statement explicitly asks for regular continuous commits during the sprint; avoid a single final dump.
+Suggested repository description
+AidFlow is a failure-resilient micro-logistics prototype for perishable surplus and emergency aid, with capacity-aware dispatch, reservation leases, cargo-aware recovery, and auditable safety constraints.
+Suggested short project description
+AidFlow coordinates surplus food and emergency aid between donors, volunteer riders, and shelters. Its Rescue Protocol evaluates fallback destinations, revalidates changing demand and resource constraints, and safely recovers failed assignments while preserving cargo and quantity accounting. A deterministic simulation lab lets judges reproduce ghost reservations, shelter closures, expiry risks, and recovery decisions.
+17. Risks, Mitigations, and Honest Claims
+Risk	Mitigation
+Scope exceeds six hours	Freeze P0 scope; cut map polish, AI, and advanced routing first.
+Agent writes impressive but untested code	Require test output, run the app, inspect diff, verify all visible controls.
+Race condition or double allocation	Use transactions/constraints, idempotent operations, and concurrency/duplicate-request tests.
+Incorrect food/medical assumptions	Use configured rules supplied by operator/authoritative policy; do not invent universal safety limits.
+In-transit cargo mishandled	Separate cargo custody from assignment state; require explicit handover.
+False impact claim	Report only measured simulation results with scenario count and configuration.
+Map/API fails during judging	Use a local schematic and simulated ETA, clearly labeled.
+Demo clock makes time tests flaky	Use an injectable simulation clock and deterministic seed data.
+Over-designed UI slows operation	Keep one primary action per state, explain disabled actions, prioritize Rescue Queue.
+
+Claims we can make if verified
+•	The prototype enforces configured capacity, demand, compatibility, and deadline constraints.
+•	The timeout processor releases an eligible reservation exactly once under tested conditions.
+•	The recovery engine revalidates fallback destinations and preserves in-transit cargo accounting.
+•	The simulation benchmark measured specified outcomes on documented seeded scenarios.
+Claims to avoid without evidence
+•	We eliminate food waste in real cities.
+•	We reduce spoilage by a specific percentage in the real world.
+•	We provide real-time traffic prediction or live GPS if using simulated values.
+•	All food/medical deliveries are guaranteed safe.
+•	The algorithm is globally unique or has no competitors.
+18. Final Acceptance Checklist
+•	☐ Fresh clone can install dependencies and start using README instructions.
+•	☐ Database persists operational state across restart.
+•	☐ Batch quantities reconcile across all state buckets.
+•	☐ Dispatch respects capacity, shelter demand, compatibility, resource requirements, and deadline.
+•	☐ Large batch splits across multiple riders without over-allocation.
+•	☐ Reservation lease expires and releases stock exactly once.
+•	☐ Shelter closure/demand change during transit causes safe reroute or intervention.
+•	☐ In-transit cargo is never incorrectly returned to donor stock.
+•	☐ No-feasible-route case raises a clear intervention alert.
+•	☐ Judge Simulation controls invoke actual backend logic.
+•	☐ Event log explains trigger, decision, quantity, and result.
+•	☐ All visible buttons work and API errors are visible to the operator.
+•	☐ Automated tests, type/lint checks, and production build pass.
+•	☐ README distinguishes implemented behavior from simulation and limitations.
+•	☐ Incremental commits are present and remote push status is verified.
+•	☐ Final demo rehearsed from a clean reset state.
+Final recommendation
+BUILD THE PROOF, NOT THE PROMISE
+In a six-hour sprint, AidFlow should win attention through a coherent interface and a reliable, observable recovery mechanism. Protect the dispatch rules, cargo ledger, simulation controls, and tests. Treat every other feature as optional until those are working.
+
+End of blueprint.

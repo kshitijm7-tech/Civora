@@ -1,0 +1,6 @@
+{
+  "name": "AidFlow — Resilient Aid Logistics",
+  "description": "Failure-resilient micro-logistics coordination prototype for surplus cooked food and emergency aid with precomputed fallback candidates, rescue clock, and cargo-aware recovery.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
