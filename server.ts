@@ -34,11 +34,11 @@ async function startServer() {
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`AidFlow server running on http://0.0.0.0:${PORT}`);
+    console.log(`Civora server running on http://0.0.0.0:${PORT}`);
   });
 }
 
 startServer().catch((err) => {
-  console.error('Failed to start AidFlow server:', err);
+  console.error('Failed to start Civora server:', err);
   process.exit(1);
 });

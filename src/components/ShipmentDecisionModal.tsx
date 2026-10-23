@@ -254,12 +254,12 @@ export const ShipmentDecisionModal: React.FC<ShipmentDecisionModalProps> = ({
             </div>
           </div>
 
-          {/* AidFlow Rescue Protocol: Live Fallback Candidates */}
+          {/* Civora Rescue Protocol: Live Fallback Candidates */}
           {!isDelivered && !isExpired && evaluation && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-slate-800 uppercase tracking-wider">
-                  Rescue Protocol: Live Fallback Candidates
+                  Civora Rescue Protocol: Live Fallback Candidates
                 </span>
                 <span className="text-[11px] text-slate-500">
                   {evaluation.canAutoRecover ? 'Safe candidate available' : 'No safe fallback'}

@@ -4,7 +4,7 @@ import { DispatchService } from '../services/dispatch.service.js';
 import { RescueService } from '../services/rescue.service.js';
 import { ClockService } from '../services/clock.service.js';
 
-describe('AidFlow Logistics & Rescue Protocol Acceptance Tests', () => {
+describe('Civora Logistics & Rescue Protocol Acceptance Tests', () => {
   beforeEach(() => {
     SeedService.resetDemo();
   });

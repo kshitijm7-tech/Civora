@@ -47,19 +47,19 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Brand */}
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-teal-500 text-slate-950 flex items-center justify-center font-black text-lg shadow-sm">
-            AF
+            CV
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-base tracking-tight text-white">
-                AIDFLOW
+              <span className="font-extrabold text-base tracking-tight text-white tracking-wide">
+                CIVORA
               </span>
               <span className="bg-teal-950 text-teal-300 border border-teal-700/60 px-2 py-0.5 rounded text-[10px] font-mono font-bold tracking-wide">
-                SIMULATION / DEMO
+                GPS LOGISTICS
               </span>
             </div>
             <p className="text-[11px] text-slate-400 font-medium">
-              Resilient Aid Logistics & Rescue Protocol
+              Resilient Civic Logistics & Rescue Protocol
             </p>
           </div>
         </div>

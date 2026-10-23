@@ -1,28 +1,29 @@
-# AidFlow — Resilient Aid Logistics
+# Civora — Resilient Aid Logistics
 
-> **Vibe-A-Thon • Social Impact & Civic Micro-Logistics Prototype**  
+> **Vibe-A-Thon • Social Impact & Civic Micro-Logistics Platform**  
 > *Keeping perishable surplus and emergency aid moving when reservations fail, destinations close, or delivery becomes infeasible.*
 
 ---
 
-## 1. Product Promise & The AidFlow Rescue Protocol
+## 1. Product Promise & The Civora Rescue Protocol
 
-AidFlow coordinates surplus cooked food and emergency relief with **failure-aware dispatch**. Instead of treating matching as an unconstrained matchmaking algorithm or simple directory, every shipment is checked against **time, capacity, demand, and physical infrastructure compatibility**, and precomputes a verifiable recovery plan before departure.
+Civora coordinates surplus cooked food and emergency relief with **failure-aware dispatch**. Instead of treating matching as an unconstrained matchmaking algorithm or simple directory, every shipment is checked against **time, capacity, demand, and physical infrastructure compatibility**, and precomputes a verifiable recovery plan before departure.
 
 ### Core Architectural Differentiators
-1. **Precomputed Fallback Candidates**: Before departure, fallback destinations are evaluated without prematurely locking stock or capacity.
-2. **Dynamic Rescue Clock**: Compares the remaining safe shelf-life window against estimated travel time plus a mandatory safety margin (+10m buffer).
-3. **Physical Cargo Custody State Machine**: Explicit separation between donor-held stock, rider custody, shelter acceptance, and held intervention:
+1. **Interactive Leaflet GPS Map**: Real-world geographical GPS tracking with custom markers, live en-route dashed polylines, layer switching (Voyager Light & OSM), and one-click auto-fit bounds.
+2. **Precomputed Fallback Candidates**: Before departure, fallback destinations are evaluated without prematurely locking stock or capacity.
+3. **Dynamic Rescue Clock**: Compares the remaining safe shelf-life window against estimated travel time plus a mandatory safety margin (+10m buffer).
+4. **Physical Cargo Custody State Machine**: Explicit separation between donor-held stock, rider custody, shelter acceptance, and held intervention:
    $$\text{AVAILABLE} \rightarrow \text{RESERVED} \rightarrow \text{ACKNOWLEDGED} \rightarrow \text{PICKED\_UP} \rightarrow \text{IN\_TRANSIT} \rightarrow \text{DELIVERED}$$
    *Crucial Safety Rule*: In-transit cargo is **never** released back to donor stock upon shelter closure. Custody remains with the volunteer while the engine reroutes or flags an urgent human intervention.
-4. **Reservation Leases & Exactly-Once Release**: Unacknowledged volunteer claims expire after a configurable lease deadline (15 mins), releasing stock back to the unassigned batch pool exactly once.
-5. **Auditable Decision Log & Reconciled Ledger**: Every trigger, evaluated candidate, rejection reason, and state transition is committed to an append-only SQLite event log.
+5. **Reservation Leases & Exactly-Once Release**: Unacknowledged volunteer claims expire after a configurable lease deadline (15 mins), releasing stock back to the unassigned batch pool exactly once.
+6. **Auditable Decision Log & Reconciled Ledger**: Every trigger, evaluated candidate, rejection reason, and state transition is committed to an append-only SQLite event log.
 
 ---
 
 ## 2. Technical Architecture
 
-- **Frontend**: React 19, TypeScript, Vite, Tailwind CSS
+- **Frontend**: React 19, TypeScript, Vite, Tailwind CSS, Leaflet (`leaflet` + `@types/leaflet`)
 - **Design Concept**: *Calm Command Center* (Navy `#102A43`, Teal `#176B68`, Cool Gray `#F5F7F8`, Rust Red alerts)
 - **Backend**: Node.js 22, Express, TypeScript (`server.ts`)
 - **Persistence**: Relational SQLite via Node's native `node:sqlite` (`DatabaseSync`), enforcing foreign keys and atomic transactions

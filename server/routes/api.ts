@@ -22,7 +22,7 @@ apiRouter.get('/health', (req: Request, res: Response) => {
   ensureSeeded();
   res.json({
     status: 'ok',
-    app: 'AidFlow — Resilient Aid Logistics',
+    app: 'Civora — Resilient Aid Logistics',
     simulatedNow: ClockService.getNowIso(),
     database: 'sqlite-connected',
   });

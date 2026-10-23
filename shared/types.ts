@@ -26,6 +26,8 @@ export interface LocationCoord {
   address: string;
   x: number; // schematic percent X [0-100]
   y: number; // schematic percent Y [0-100]
+  lat?: number;
+  lng?: number;
 }
 
 export interface AidBatch {

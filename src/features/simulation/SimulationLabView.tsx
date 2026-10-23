@@ -97,7 +97,7 @@ export const SimulationLabView: React.FC<SimulationLabViewProps> = ({
       tag: 'CARGO CUSTODY & REROUTE',
       badgeColor: 'bg-blue-50 text-blue-800 border-blue-200',
       description: 'Cargo is in physical transit (RIDER_CUSTODY) when destination shelter closes or drops demand to zero.',
-      expectedOutcome: 'In-transit cargo is NEVER returned to donor pool. AidFlow revalidates feasible alternatives and safely reroutes the rider.',
+      expectedOutcome: 'In-transit cargo is NEVER returned to donor pool. Civora revalidates feasible alternatives and safely reroutes the rider.',
     },
     {
       key: 'scenario-d-resource',

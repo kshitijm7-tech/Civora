@@ -49,7 +49,7 @@ export const RescueCenterView: React.FC<RescueCenterViewProps> = ({
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded text-[11px] font-bold uppercase bg-teal-500 text-slate-950">
-              AidFlow Rescue Protocol
+              Civora Rescue Protocol
             </span>
             <span className="text-xs text-slate-300 font-mono">
               Deterministic Rerouting & Cargo Accounting Engine
@@ -59,7 +59,7 @@ export const RescueCenterView: React.FC<RescueCenterViewProps> = ({
             Live Contingency Monitoring & Human Intervention Center
           </h2>
           <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
-            Every shipment maintains precomputed fallback candidates before departure. If destination demand drops or a shelter closes mid-transit, AidFlow verifies capacity, item compatibility, and remaining safe shelf-life before rerouting.
+            Every shipment maintains precomputed fallback candidates before departure. If destination demand drops or a shelter closes mid-transit, Civora verifies capacity, item compatibility, and remaining safe shelf-life before rerouting.
           </p>
         </div>
 

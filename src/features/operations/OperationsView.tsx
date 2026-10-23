@@ -3,9 +3,10 @@ import type { DashboardSummary, Assignment, Shelter, Rider, AidBatch } from '../
 import { RescueClock } from '../../components/RescueClock.js';
 import { AllocationLedgerBar } from '../../components/AllocationLedgerBar.js';
 import { NetworkSchematic } from '../../components/NetworkSchematic.js';
+import { GpsLeafletMap } from '../../components/GpsLeafletMap.js';
 import { 
   AlertTriangle, ShieldAlert, ArrowRight, Truck, CheckCircle2, 
-  Clock, Package, RefreshCw, Eye
+  Clock, Package, RefreshCw, Eye, Map, Compass
 } from 'lucide-react';
 import { api } from '../../lib/api.js';
 
@@ -31,6 +32,7 @@ export const OperationsView: React.FC<OperationsViewProps> = ({
   onNavigateToDispatch,
 }) => {
   const [actingId, setActingId] = useState<string | null>(null);
+  const [mapView, setMapView] = useState<'leaflet' | 'schematic'>('leaflet');
 
   if (!dashboard) {
     return (
@@ -296,14 +298,63 @@ export const OperationsView: React.FC<OperationsViewProps> = ({
         )}
       </div>
 
-      {/* Network Schematic Map */}
-      <NetworkSchematic
-        batches={batches}
-        shelters={shelters}
-        riders={riders}
-        assignments={assignments}
-        onSelectAssignment={onOpenShipment}
-      />
+      {/* Map Section with Mode Toggle */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+              Network Routing & Fleet Corridors
+            </h3>
+            <span className="text-[11px] font-mono bg-teal-50 text-teal-800 border border-teal-200 px-2 py-0.5 rounded">
+              {mapView === 'leaflet' ? 'Leaflet GPS Mode' : 'Topological Schematic'}
+            </span>
+          </div>
+
+          <div className="flex items-center bg-slate-200 p-0.5 rounded-lg border border-slate-300 text-xs">
+            <button
+              onClick={() => setMapView('leaflet')}
+              className={`px-3 py-1 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                mapView === 'leaflet'
+                  ? 'bg-teal-700 text-white shadow-xs'
+                  : 'text-slate-700 hover:text-slate-900'
+              }`}
+            >
+              <Compass className="w-3.5 h-3.5" />
+              <span>Leaflet GPS Map</span>
+            </button>
+            <button
+              onClick={() => setMapView('schematic')}
+              className={`px-3 py-1 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                mapView === 'schematic'
+                  ? 'bg-teal-700 text-white shadow-xs'
+                  : 'text-slate-700 hover:text-slate-900'
+              }`}
+            >
+              <Map className="w-3.5 h-3.5" />
+              <span>Schematic View</span>
+            </button>
+          </div>
+        </div>
+
+        {mapView === 'leaflet' ? (
+          <GpsLeafletMap
+            batches={batches}
+            shelters={shelters}
+            riders={riders}
+            assignments={assignments}
+            selectedAssignmentId={null}
+            onSelectAssignment={onOpenShipment}
+          />
+        ) : (
+          <NetworkSchematic
+            batches={batches}
+            shelters={shelters}
+            riders={riders}
+            assignments={assignments}
+            onSelectAssignment={onOpenShipment}
+          />
+        )}
+      </div>
     </div>
   );
 };
