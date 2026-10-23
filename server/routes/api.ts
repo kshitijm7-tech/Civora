@@ -348,9 +348,9 @@ apiRouter.post('/rescue/:shipmentId/evaluate', (req: Request, res: Response) => 
 
 // POST /api/rescue/:shipmentId/execute
 apiRouter.post('/rescue/:shipmentId/execute', (req: Request, res: Response) => {
-  const { targetShelterId } = req.body;
+  const { targetShelterId, force } = req.body;
   try {
-    const updated = RescueService.executeRescue(req.params.shipmentId, targetShelterId);
+    const updated = RescueService.executeRescue(req.params.shipmentId, targetShelterId, force === true);
     res.json(updated);
   } catch (err: any) {
     res.status(400).json({ error: err.message });

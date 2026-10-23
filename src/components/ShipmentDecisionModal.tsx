@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import type { Assignment, RescueEvaluationResult } from '../../shared/types.js';
+import type { Assignment, RescueEvaluationResult, Shelter } from '../../shared/types.js';
 import { api } from '../lib/api.js';
 import { RescueClock } from './RescueClock.js';
 import { 
   X, Check, Truck, Package, ShieldAlert, ArrowRight, 
-  MapPin, User, Building, AlertCircle, RefreshCw, Clock
+  MapPin, User, Building, AlertCircle, RefreshCw, Clock, ShieldCheck, Wrench
 } from 'lucide-react';
 
 interface ShipmentDecisionModalProps {
@@ -22,6 +22,7 @@ export const ShipmentDecisionModal: React.FC<ShipmentDecisionModalProps> = ({
 }) => {
   const [assignment, setAssignment] = useState<Assignment | null>(null);
   const [evaluation, setEvaluation] = useState<RescueEvaluationResult | null>(null);
+  const [shelters, setShelters] = useState<Shelter[]>([]);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,12 +31,14 @@ export const ShipmentDecisionModal: React.FC<ShipmentDecisionModalProps> = ({
     try {
       setLoading(true);
       setError(null);
-      const [a, evalRes] = await Promise.all([
+      const [a, evalRes, shelRes] = await Promise.all([
         api.getAssignment(assignmentId),
         api.evaluateRescue(assignmentId).catch(() => null),
+        api.getShelters().catch(() => [] as any[]),
       ]);
       setAssignment(a);
       setEvaluation(evalRes);
+      setShelters(shelRes);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -314,6 +317,50 @@ export const ShipmentDecisionModal: React.FC<ShipmentDecisionModalProps> = ({
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          )}
+
+          {/* Operator Force Override: Manual Reroute for stuck interventions */}
+          {isIntervention && !evaluation?.canAutoRecover && (
+            <div className="p-4 bg-amber-50 border-2 border-amber-300 rounded-xl space-y-3">
+              <div className="flex items-center gap-2 text-amber-800 font-bold text-sm">
+                <Wrench className="w-5 h-5 text-amber-600" />
+                <span>Operator Force Override (Manual Reroute)</span>
+              </div>
+              <p className="text-xs text-amber-700 leading-relaxed">
+                No safe fallback candidate passed automated feasibility gates. As the operator, you may manually force-reroute this shipment to any active shelter below. This bypasses strict resource, demand, and deadline checks.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {shelters
+                  .filter(s => s.id !== assignment.shelterId && s.active)
+                  .map(s => {
+                    const demand = s.demandByCategory[assignment.category] || 0;
+                    const sufficient = demand >= assignment.quantity;
+                    return (
+                      <button
+                        key={s.id}
+                        disabled={acting || !sufficient}
+                        onClick={() =>
+                          handleAction(() => api.executeRescue(assignment.id, s.id, true))
+                        }
+                        className={`px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-30 ${
+                          sufficient
+                            ? 'bg-teal-600 hover:bg-teal-700 text-white shadow-xs'
+                            : 'bg-slate-200 text-slate-400 border border-slate-300'
+                        }`}
+                        title={
+                          sufficient
+                            ? `Force reroute to ${s.name}`
+                            : `Insufficient ${assignment.category} demand (${demand} available, need ${assignment.quantity})`
+                        }
+                      >
+                        <MapPin className="w-3.5 h-3.5" />
+                        {s.name}
+                        {!sufficient && <span className="text-[10px] opacity-70 ml-1">(low demand)</span>}
+                      </button>
+                    );
+                  })}
               </div>
             </div>
           )}

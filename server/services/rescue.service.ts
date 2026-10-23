@@ -449,8 +449,9 @@ export class RescueService {
 
   /**
    * Executes recovery: reroutes to a feasible alternative shelter or transitions to INTERVENTION_REQUIRED.
+   * When force is true, operator override allows rerouting to any active shelter even if strict feasibility gates fail.
    */
-  static executeRescue(assignmentId: string, targetShelterId?: string): Assignment {
+  static executeRescue(assignmentId: string, targetShelterId?: string, force = false): Assignment {
     const db = getDatabase();
     const evaluation = this.evaluateRescue(assignmentId);
     const assignment = DispatchService.getAssignment(assignmentId)!;
@@ -460,7 +461,8 @@ export class RescueService {
       ? evaluation.candidates.find(c => c.shelterId === targetShelterId)
       : evaluation.bestFeasibleCandidate;
 
-    if (!chosenCandidate || !chosenCandidate.feasible) {
+    // Operator override: bypass strict feasibility when no safe candidate exists
+    if (!chosenCandidate || (!chosenCandidate.feasible && !force)) {
       // No safe option or target is infeasible -> MUST trigger intervention!
       const reason = chosenCandidate?.rejectionReason || evaluation.recommendation;
       db.prepare(`
@@ -490,8 +492,26 @@ export class RescueService {
       return DispatchService.getAssignment(assignmentId)!;
     }
 
-    // Candidate is feasible: apply reroute atomically
-    const newShelter = DispatchService.getShelter(chosenCandidate.shelterId)!;
+    // Force override path: target may be infeasible by strict rules but operator authorizes reroute
+    let chosenShelter: Shelter;
+    let finalTravelMinutes: number;
+    let finalScore: number;
+
+    if (force && chosenCandidate && !chosenCandidate.feasible) {
+      const shelter = DispatchService.getShelter(chosenCandidate.shelterId);
+      if (!shelter || !shelter.active) {
+        throw new Error(`Cannot force-reroute: shelter ${chosenCandidate.shelterId} is not active.`);
+      }
+      chosenShelter = shelter;
+      finalTravelMinutes = chosenCandidate.estimatedMinutes;
+      finalScore = chosenCandidate.score;
+    } else if (chosenCandidate) {
+      chosenShelter = DispatchService.getShelter(chosenCandidate.shelterId)!;
+      finalTravelMinutes = chosenCandidate.estimatedMinutes;
+      finalScore = chosenCandidate.score;
+    } else {
+      throw new Error(`No target shelter available for rescue of ${assignmentId}.`);
+    }
 
     db.exec('BEGIN TRANSACTION;');
     try {
@@ -505,19 +525,19 @@ export class RescueService {
             updated_at = ?
         WHERE id = ?
       `).run(
-        newShelter.id,
-        newShelter.name,
-        JSON.stringify(newShelter.location),
-        chosenCandidate.estimatedMinutes,
+        chosenShelter.id,
+        chosenShelter.name,
+        JSON.stringify(chosenShelter.location),
+        finalTravelMinutes,
         nowIso,
         assignmentId
       );
 
-      // Deduct demand from new shelter
-      const newShelterDemand = { ...newShelter.demandByCategory };
+      // Deduct demand from new shelter (allow going negative on force override to reflect operator decision)
+      const newShelterDemand = { ...chosenShelter.demandByCategory };
       newShelterDemand[assignment.category] = Math.max(0, (newShelterDemand[assignment.category] || 0) - assignment.quantity);
       db.prepare('UPDATE shelters SET demand_by_category_json = ?, updated_at = ? WHERE id = ?')
-        .run(JSON.stringify(newShelterDemand), nowIso, newShelter.id);
+        .run(JSON.stringify(newShelterDemand), nowIso, chosenShelter.id);
 
       db.exec('COMMIT;');
     } catch (err) {
@@ -528,15 +548,18 @@ export class RescueService {
     EventLogService.record({
       entityType: 'ASSIGNMENT',
       entityId: assignmentId,
-      eventType: 'SHIPMENT_REROUTED',
-      severity: 'SUCCESS',
-      trigger: 'RESCUE_PROTOCOL_AUTO_RECOVERY',
-      reason: `Successfully rerouted in-transit cargo (${assignment.quantity} ${assignment.unit}) from ${assignment.shelterName} to ${newShelter.name}. ETA: ${chosenCandidate.estimatedMinutes}m. Safe-use window preserved.`,
+      eventType: force ? 'SHIPMENT_FORCE_REROUTED' : 'SHIPMENT_REROUTED',
+      severity: force ? 'CAUTION' : 'SUCCESS',
+      trigger: force ? 'OPERATOR_FORCE_OVERRIDE' : 'RESCUE_PROTOCOL_AUTO_RECOVERY',
+      reason: force
+        ? `OPERATOR FORCE OVERRIDE: Rerouted in-transit cargo (${assignment.quantity} ${assignment.unit}) from ${assignment.shelterName} to ${chosenShelter.name} despite feasibility gate (${chosenCandidate?.rejectionReason || 'strict rules failed'}). ETA: ${finalTravelMinutes}m.`
+        : `Successfully rerouted in-transit cargo (${assignment.quantity} ${assignment.unit}) from ${assignment.shelterName} to ${chosenShelter.name}. ETA: ${finalTravelMinutes}m. Safe-use window preserved.`,
       affectedQuantity: assignment.quantity,
       metadata: {
         previousShelter: assignment.shelterName,
-        newShelter: newShelter.name,
-        estimatedTravelMinutes: chosenCandidate.estimatedMinutes,
+        newShelter: chosenShelter.name,
+        estimatedTravelMinutes: finalTravelMinutes,
+        forceOverride: force,
       },
     });
 

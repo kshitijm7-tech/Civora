@@ -89,10 +89,10 @@ export const api = {
   evaluateRescue: (shipmentId: string) =>
     fetchApi<RescueEvaluationResult>(`/rescue/${shipmentId}/evaluate`, { method: 'POST' }),
 
-  executeRescue: (shipmentId: string, targetShelterId?: string) =>
+  executeRescue: (shipmentId: string, targetShelterId?: string, force?: boolean) =>
     fetchApi<Assignment>(`/rescue/${shipmentId}/execute`, {
       method: 'POST',
-      body: JSON.stringify({ targetShelterId }),
+      body: JSON.stringify({ targetShelterId, force }),
     }),
 
   advanceSimulation: (minutes: number) =>
