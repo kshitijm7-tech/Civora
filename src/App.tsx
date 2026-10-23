@@ -18,6 +18,7 @@ import { RescueCenterView } from './features/rescue/RescueCenterView.js';
 import { SimulationLabView } from './features/simulation/SimulationLabView.js';
 import { EventLogView } from './features/events/EventLogView.js';
 import { DemoMapView } from './features/demo/DemoMapView.js';
+import { LandingPage } from './components/LandingPage.js';
 import { 
   Activity, Package, Zap, Bike, Building2, 
   ShieldAlert, Cpu, FileText, AlertCircle, RefreshCw, Map
@@ -48,6 +49,7 @@ export const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [showLanding, setShowLanding] = useState(true);
 
   const loadAll = useCallback(async () => {
     try {
@@ -111,15 +113,19 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F5F7F8] text-[#102A43] flex flex-col font-sans">
-      
-      {/* Top Header */}
-      <Header
-        simulatedNow={simulatedNow}
-        onRefresh={handleRefresh}
-        onOpenSimulationLab={() => setActiveTab('simulation')}
-      />
+      {showLanding ? (
+        <LandingPage onEnterApp={() => setShowLanding(false)} />
+      ) : (
+        <>
+          {/* Top Header */}
+          <Header
+            simulatedNow={simulatedNow}
+            onRefresh={handleRefresh}
+            onOpenSimulationLab={() => setActiveTab('simulation')}
+            onReturnToLanding={() => setShowLanding(true)}
+          />
 
-      <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex flex-col md:flex-row gap-6">
+          <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex flex-col md:flex-row gap-6">
         
         {/* Persistent Left Navigation Sidebar */}
         <aside className="w-full md:w-64 shrink-0 space-y-4">
@@ -273,8 +279,9 @@ export const App: React.FC = () => {
           onActionComplete={handleRefresh}
         />
       )}
-
-    </div>
+      </>
+  )}
+</div>
   );
 };
 

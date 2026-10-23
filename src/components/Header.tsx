@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   ShieldAlert, Clock, RotateCcw, Cpu, 
-  Activity, Sparkles, AlertCircle
+  Activity, Sparkles, AlertCircle, Map
 } from 'lucide-react';
 import { api } from '../lib/api.js';
 
@@ -9,12 +9,14 @@ interface HeaderProps {
   simulatedNow: string;
   onRefresh: () => void;
   onOpenSimulationLab: () => void;
+  onReturnToLanding: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   simulatedNow,
   onRefresh,
   onOpenSimulationLab,
+  onReturnToLanding,
 }) => {
   const [advancing, setAdvancing] = React.useState(false);
 
@@ -118,6 +120,14 @@ export const Header: React.FC<HeaderProps> = ({
             title="Reset to Baseline Seed State"
           >
             <RotateCcw className="w-4 h-4" />
+          </button>
+
+          <button
+            onClick={onReturnToLanding}
+            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+            title="Return to Landing Page"
+          >
+            <Map className="w-4 h-4" />
           </button>
         </div>
 
