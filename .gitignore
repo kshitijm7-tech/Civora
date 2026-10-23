@@ -7,3 +7,5 @@ coverage/
 .env*
 !.env.example
 aidflow.db
+run.bat
+.logs/
